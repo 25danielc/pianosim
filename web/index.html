@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moonlight — III. Presto agitato</title>
+<style>
+  @font-face { font-family: "Cormorant Garamond"; src: url("fonts/CormorantGaramond.ttf") format("truetype"); font-weight: 300 700; font-style: normal; }
+  @font-face { font-family: "Cormorant Garamond"; src: url("fonts/CormorantGaramond-Italic.ttf") format("truetype"); font-weight: 300 700; font-style: italic; }
+  :root {
+    --void: #07090F;
+    --midnight: #0E1A2E;
+    --moon: #CFE0FF;
+    --ivory: #F2EDE3;
+    --glow: #8FB4FF;
+    --margin: 152px;           /* 1920 / 12.6, shared by both cards */
+  }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--void); }
+  canvas { position: absolute; inset: 0; width: 1920px; height: 1080px; display: block; }
+  .card {
+    position: absolute; left: var(--margin); right: var(--margin);
+    font-family: "Cormorant Garamond", serif; color: var(--moon);
+    opacity: 0; will-change: opacity, filter;
+    -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
+    font-kerning: normal; font-feature-settings: "liga", "kern", "onum";
+  }
+  /* End card: black, same left margin, quieter */
+  #end { top: 50%; transform: translateY(-50%); }
+  #end h2 { margin: 0; font-weight: 300; font-size: 64px; line-height: 1.05; letter-spacing: .01em; }
+  #end .work { margin: 18px 0 0 3px; font-style: italic; font-size: 32px; color: var(--ivory); opacity: .72; }
+  #end .rule { width: 72px; height: 1px; background: var(--glow); opacity: .55; margin: 54px 0 30px 3px; }
+  #end .credits { margin: 0 0 0 3px; font-size: 22px; line-height: 1.6; color: var(--ivory); opacity: .5; max-width: 62ch; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+
+
+
+<div class="card" id="end">
+  <h2>Ludwig van Beethoven</h2>
+  <div class="work">Piano Sonata No. 14 in C♯ minor, Op. 27 No. 2 — III. Presto agitato, bars 1–57</div>
+  <div class="rule"></div>
+  <p class="credits">
+    Score: Mutopia Project, after the Berners edition (1908), typeset by Chris Sawer and Stewart Holmes, CC BY-SA 2.5<br>
+    Piano: Salamander Grand Piano by Alexander Holm, via FreePats, CC BY 3.0
+  </p>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "./node_modules/three/build/three.module.js",
+  "three/addons/": "./node_modules/three/examples/jsm/"
+} }
+</script>
+<script type="module" src="main.js"></script>
+</body>
+</html>

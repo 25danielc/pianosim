@@ -1,0 +1,29 @@
+# Rendered frames & previews (~18 GB of PNGs)
+frames/
+frames_preview/
+frames_draft/
+look/
+code_frames/
+
+# Rendered video / audio output
+out/
+*.mp4
+*.wav
+
+# Large third-party sample library (1.2 GB SoundFont, over GitHub's 100 MB limit)
+assets/
+*.sf2
+
+# Blender autosave backups
+*.blend1
+
+# Dependencies / environments
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+
+# Logs / OS junk
+*.log
+.DS_Store
+*~

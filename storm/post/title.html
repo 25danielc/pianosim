@@ -1,0 +1,26 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  @font-face { font-family: "Cormorant"; src: url("fonts/CormorantGaramond.ttf"); font-weight: 300 700; }
+  @font-face { font-family: "Cormorant"; src: url("fonts/CormorantGaramond-Italic.ttf"); font-style: italic; font-weight: 300 700; }
+  html, body { margin: 0; background: transparent; }
+  .t { position: absolute; color: #F2EDE3; font-family: "Cormorant", serif; font-weight: 400;
+       font-size: 38px; letter-spacing: 0.01em; line-height: 1;
+       text-shadow: 0 0 18px rgba(7, 9, 15, 0.85), 0 1px 2px rgba(7, 9, 15, 0.9);
+       font-feature-settings: "liga", "kern", "onum"; white-space: nowrap; }
+  .t em { font-style: italic; font-weight: 500; }
+  .t .s { opacity: 0.72; }
+  .t .dot { opacity: 0.5; padding: 0 0.28em; }
+</style></head>
+<body>
+  <div class="t" id="t"><em>Moonlight Sonata</em> <span class="s">— III. Presto agitato</span><span class="dot">·</span><span class="s">Beethoven</span></div>
+  <script>
+    const p = new URLSearchParams(location.search);
+    const w = +p.get("w"), h = +p.get("h"), size = +(p.get("size") || 38);
+    document.body.style.width = w + "px"; document.body.style.height = h + "px";
+    const t = document.getElementById("t");
+    t.style.fontSize = size + "px";
+    if (p.get("wrap") === "1") { t.style.whiteSpace = "normal"; t.style.width = (w - 2 * +p.get("x")) + "px"; t.style.lineHeight = "1.25"; }
+    t.style.left = p.get("x") + "px"; t.style.bottom = p.get("y") + "px";
+  </script>
+</body></html>

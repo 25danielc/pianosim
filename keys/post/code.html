@@ -1,0 +1,93 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  :root { --bg: rgba(7, 9, 15, 0.86); --ink: #CFE0FF; --dim: #5d6b85; --kw: #8FB4FF; --num: #F2EDE3; --rule: #1b2638; }
+  html, body { margin: 0; width: 1920px; height: 1080px; background: transparent; overflow: hidden; }
+  .panel { position: absolute; left: 40px; top: 56px; width: 900px; height: 968px; background: var(--bg);
+           border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; color: var(--ink);
+           font-family: Menlo, "SF Mono", monospace; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55); }
+  .tab { height: 46px; display: flex; align-items: center; padding: 0 20px; gap: 18px; border-bottom: 1px solid var(--rule);
+         font-size: 15px; color: var(--dim); }
+  .tab .file { color: var(--ink); }
+  .tab .who { margin-left: auto; font-family: "Cormorant", serif; font-style: italic; font-size: 19px; color: #F2EDE3; opacity: 0.8; }
+  .code { position: absolute; top: 47px; left: 0; right: 0; height: 548px; overflow: hidden; }
+  .lines { position: absolute; left: 0; right: 0; top: 0; }
+  .ln { min-height: 27px; line-height: 27px; font-size: 17px; white-space: pre-wrap; overflow-wrap: anywhere; padding-left: calc(64px + 4ch); text-indent: -4ch; padding-right: 18px; position: relative; }
+  .ln .no { position: absolute; left: 0; width: 46px; text-align: right; color: #33405a; text-indent: 0; }
+  .ln.hl { background: rgba(143, 180, 255, 0.16); }
+  .kw { color: var(--kw); } .cm { color: var(--dim); font-style: italic; } .nm { color: var(--num); } .st { color: #a9b8cf; }
+  .con { position: absolute; top: 596px; left: 0; right: 0; height: 306px; border-top: 1px solid var(--rule); }
+  .con h { display: block; font-size: 13px; letter-spacing: 0.04em; color: var(--dim); padding: 14px 22px 8px; }
+  .ev { height: 30px; line-height: 30px; font-size: 21px; padding-left: 22px; white-space: pre; }
+  .ev .t { color: var(--dim); } .ev .n { color: var(--num); } .ev .k { color: var(--kw); }
+  .status { position: absolute; bottom: 0; left: 0; right: 0; height: 50px; border-top: 1px solid var(--rule);
+            display: flex; align-items: center; padding: 0 22px; font-size: 15px; color: var(--dim); gap: 22px; }
+  .status b { color: var(--ink); font-weight: 400; }
+  @font-face { font-family: "Cormorant"; src: url("fonts/CormorantGaramond-Italic.ttf"); font-style: italic; }
+</style></head>
+<body>
+<div class="panel" id="panel">
+  <div class="tab"><span class="file">keys/blender/piano.py</span><span>anim.py</span><span>shots.py</span><span class="who">written by Claude Opus 5.5</span></div>
+  <div class="code"><div class="lines" id="lines"></div></div>
+  <div class="con"><h>NOTES → KEYS &nbsp;&nbsp; (from the score, frame-exact)</h><div id="events"></div></div>
+  <div class="status" id="status"></div>
+</div>
+<script>
+const KW = new Set(["def","return","if","else","elif","for","in","import","from","class","while","not","and","or","is","None","True","False"]);
+const TOK = /(#.*$)|("[^"]*"|'[^']*')|(\b\d+\.?\d*\b)|([A-Za-z_][A-Za-z_0-9]*)|([^#"'A-Za-z_0-9]+|.)/g;
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+function hi(line) {
+  let out = "", m;
+  TOK.lastIndex = 0;
+  while ((m = TOK.exec(line)) !== null) {
+    if (m[0] === "") { TOK.lastIndex++; continue; }
+    if (m[1]) out += `<span class="cm">${esc(m[1])}</span>`;
+    else if (m[2]) out += `<span class="st">${esc(m[2])}</span>`;
+    else if (m[3]) out += `<span class="nm">${esc(m[3])}</span>`;
+    else if (m[4]) out += KW.has(m[4]) ? `<span class="kw">${m[4]}</span>` : esc(m[4]);
+    else out += esc(m[0]);
+  }
+  return out;
+}
+let DATA = null;
+async function init() {
+  DATA = await (await fetch("code_data.json")).json();
+  document.getElementById("lines").innerHTML = DATA.code.map((l, i) =>
+    `<div class="ln" id="L${i}"><span class="no">${i + 1}</span>${hi(l)}</div>`).join("");
+  await document.fonts.ready;
+  window.READY = true;
+}
+const ease = u => u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u);
+window.render = function (t, frame) {
+  // code scrolls from the key builder down to the key-press function by 2.4 s
+  const last = document.getElementById("L" + (DATA.code.length - 1));
+  const maxScroll = Math.max(0, last.offsetTop + last.offsetHeight - 540);
+  const s = ease(Math.min(1, Math.max(0, (t - 0.15) / 2.25)));
+  document.getElementById("lines").style.transform = `translateY(${-s * maxScroll}px)`;
+  // flash the key-press line on every onset
+  const recent = DATA.events.filter(e => e.t <= t && t - e.t < 0.07).length > 0;
+  document.querySelectorAll(".ln.hl").forEach(n => n.classList.remove("hl"));
+  if (recent) document.getElementById("L" + DATA.hl).classList.add("hl");
+  // note log: the last 9 events at/before t
+  const shown = DATA.events.filter(e => e.t <= t + 1e-6).slice(-8);
+  document.getElementById("events").innerHTML = shown.map(e =>
+    `<div class="ev"><span class="t">${e.t.toFixed(3).padStart(6, "0")}</span>  <span class="n">${e.name.padEnd(4)}</span> v${String(e.v).padStart(3)}  <span class="k">key ${String(e.k).padStart(2, "0")} ▼</span></div>`).join("");
+  // status: frame clock, then the render converging at the first sforzando
+  let st;
+  const k = frame - Math.ceil(2.75 * 60 - 1e-9);
+  if (k < 0) st = `<span>cycles</span><span>wireframe pass</span><span>frame <b>${String(frame).padStart(4, "0")}</b></span><span>t = <b>${t.toFixed(3)} s</b></span>`;
+  else {
+    const spp = Math.max(1, Math.min(64, Math.round(Math.pow(2, k / 4.5))));
+    st = k < 34 ? `<span>cycles</span><span>path tracing</span><span><b>${String(spp).padStart(2)}</b> / 64 spp</span><span>frame <b>${String(frame).padStart(4, "0")}</b></span>`
+                : `<span>cycles</span><span>denoised</span><span>frame <b>${String(frame).padStart(4, "0")}</b></span>`;
+  }
+  document.getElementById("status").innerHTML = st;
+  // slide away as the render resolves
+  const out = ease((t - 2.95) / 0.45);
+  const p = document.getElementById("panel");
+  p.style.transform = `translateX(${-out * 980}px)`;
+  p.style.opacity = String(1 - 0.6 * out);
+};
+init();
+</script>
+</body></html>

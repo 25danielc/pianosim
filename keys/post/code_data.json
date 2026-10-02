@@ -1,0 +1,332 @@
+{
+ "code": [
+  "# Moonlight Sonata \u2014 III. Presto agitato \u00b7 Beethoven",
+  "# every key, light and frame below is computed from the score",
+  "",
+  "# --- keys ----------------------------------------------------------------",
+  "blacks = {k: (xl, xr) for k, b, xc, (xl, xr) in layout if b}",
+  "for k, is_black, xc, (xl, xr) in layout:",
+  "    bm = bmesh.new()",
+  "    if is_black:",
+  "        y0, y1, z0, z1 = 0.052, KEY_BACK, KEY_BOT, KEY_TOP + 0.012",
+  "        hw, tw = 0.00685, 0.0050",
+  "        vs = [bm.verts.new(v) for v in [",
+  "            (xc - hw, y0, z0), (xc + hw, y0, z0), (xc + hw, y1, z0), (xc - hw, y1, z0),",
+  "            (xc - tw, y0 + 0.009, z1), (xc + tw, y0 + 0.009, z1), (xc + tw, y1, z1), (xc - tw, y1, z1)]]",
+  "        for f in [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]:",
+  "            bm.faces.new([vs[i] for i in f])",
+  "        ob = mesh_from_bmesh(f\"key_{k:02d}\", bm, M[\"ebony\"], coll)",
+  "        add_bevel(ob, 0.0007, 2)",
+  "    else:",
+  "",
+  "",
+  "# --- anim.py ---",
+  "def key_depth_frac(k, t, _nested=False):",
+  "    \"\"\"0 up .. 1 bottomed (>1 felt compression, <0 overshoot above rest).\"\"\"",
+  "    i = bisect.bisect_right(PRESS0[k], t) - 1",
+  "    if i < 0:",
+  "        return 0.0",
+  "    n = KEYS[k][i]",
+  "    start = key_depth_frac(k, n.press0 - 1e-6, True) if (i > 0 and not _nested) else 0.0",
+  "    if t < n.t_full:",
+  "        u = (t - n.press0) / (n.t_full - n.press0)",
+  "        e = u * u * (3 - 2 * u) if u > 0 else 0.0",
+  "        return start + (1 - start) * e",
+  "    if t < n.vis_off:",
+  "        r = t - n.t_full",
+  "        bump = 0.075 * (n.v / 127) * (r / 0.006) * math.exp(1 - r / 0.006)   # felt bottom-out",
+  "        return 1.0 + bump",
+  "    r = t - n.vis_off",
+  "    tau = max(0.012, n.rel * 0.38)",
+  "    return math.exp(-r / tau) * math.cos(math.pi * r / (2.6 * tau))",
+  "",
+  "",
+  "def key_depth_m(k, t):",
+  "    i = bisect.bisect_right(PRESS0[k], t) - 1"
+ ],
+ "events": [
+  {
+   "t": 0.25,
+   "name": "C#2",
+   "v": 48,
+   "k": 16
+  },
+  {
+   "t": 0.3391,
+   "name": "G#2",
+   "v": 47,
+   "k": 23
+  },
+  {
+   "t": 0.4286,
+   "name": "G#2",
+   "v": 45,
+   "k": 23
+  },
+  {
+   "t": 0.4286,
+   "name": "C#3",
+   "v": 49,
+   "k": 28
+  },
+  {
+   "t": 0.5177,
+   "name": "E3",
+   "v": 49,
+   "k": 31
+  },
+  {
+   "t": 0.6073,
+   "name": "C#2",
+   "v": 46,
+   "k": 16
+  },
+  {
+   "t": 0.6073,
+   "name": "G#3",
+   "v": 52,
+   "k": 35
+  },
+  {
+   "t": 0.6964,
+   "name": "C#3",
+   "v": 46,
+   "k": 28
+  },
+  {
+   "t": 0.7859,
+   "name": "G#2",
+   "v": 44,
+   "k": 23
+  },
+  {
+   "t": 0.7859,
+   "name": "E3",
+   "v": 48,
+   "k": 31
+  },
+  {
+   "t": 0.875,
+   "name": "G#3",
+   "v": 50,
+   "k": 35
+  },
+  {
+   "t": 0.9641,
+   "name": "C#2",
+   "v": 45,
+   "k": 16
+  },
+  {
+   "t": 0.9641,
+   "name": "C#4",
+   "v": 52,
+   "k": 40
+  },
+  {
+   "t": 1.0536,
+   "name": "E3",
+   "v": 49,
+   "k": 31
+  },
+  {
+   "t": 1.1427,
+   "name": "G#2",
+   "v": 41,
+   "k": 23
+  },
+  {
+   "t": 1.1427,
+   "name": "G#3",
+   "v": 52,
+   "k": 35
+  },
+  {
+   "t": 1.2323,
+   "name": "C#4",
+   "v": 52,
+   "k": 40
+  },
+  {
+   "t": 1.3214,
+   "name": "C#2",
+   "v": 45,
+   "k": 16
+  },
+  {
+   "t": 1.3214,
+   "name": "E4",
+   "v": 51,
+   "k": 43
+  },
+  {
+   "t": 1.4109,
+   "name": "G#3",
+   "v": 48,
+   "k": 35
+  },
+  {
+   "t": 1.5,
+   "name": "G#2",
+   "v": 44,
+   "k": 23
+  },
+  {
+   "t": 1.5,
+   "name": "C#4",
+   "v": 47,
+   "k": 40
+  },
+  {
+   "t": 1.5891,
+   "name": "E4",
+   "v": 48,
+   "k": 43
+  },
+  {
+   "t": 1.6786,
+   "name": "C#2",
+   "v": 47,
+   "k": 16
+  },
+  {
+   "t": 1.6786,
+   "name": "G#4",
+   "v": 58,
+   "k": 47
+  },
+  {
+   "t": 1.7677,
+   "name": "C#4",
+   "v": 50,
+   "k": 40
+  },
+  {
+   "t": 1.8573,
+   "name": "G#2",
+   "v": 41,
+   "k": 23
+  },
+  {
+   "t": 1.8573,
+   "name": "E4",
+   "v": 49,
+   "k": 43
+  },
+  {
+   "t": 1.9464,
+   "name": "G#4",
+   "v": 52,
+   "k": 47
+  },
+  {
+   "t": 2.0359,
+   "name": "C#2",
+   "v": 43,
+   "k": 16
+  },
+  {
+   "t": 2.0359,
+   "name": "C#5",
+   "v": 51,
+   "k": 52
+  },
+  {
+   "t": 2.125,
+   "name": "E4",
+   "v": 50,
+   "k": 43
+  },
+  {
+   "t": 2.2141,
+   "name": "G#2",
+   "v": 44,
+   "k": 23
+  },
+  {
+   "t": 2.2141,
+   "name": "G#4",
+   "v": 50,
+   "k": 47
+  },
+  {
+   "t": 2.3037,
+   "name": "C#5",
+   "v": 53,
+   "k": 52
+  },
+  {
+   "t": 2.3927,
+   "name": "C#2",
+   "v": 41,
+   "k": 16
+  },
+  {
+   "t": 2.3927,
+   "name": "E5",
+   "v": 56,
+   "k": 55
+  },
+  {
+   "t": 2.4823,
+   "name": "G#4",
+   "v": 49,
+   "k": 47
+  },
+  {
+   "t": 2.5713,
+   "name": "G#2",
+   "v": 45,
+   "k": 23
+  },
+  {
+   "t": 2.5713,
+   "name": "C#5",
+   "v": 52,
+   "k": 52
+  },
+  {
+   "t": 2.6609,
+   "name": "E5",
+   "v": 54,
+   "k": 55
+  },
+  {
+   "t": 2.75,
+   "name": "C#2",
+   "v": 95,
+   "k": 16
+  },
+  {
+   "t": 2.75,
+   "name": "C#3",
+   "v": 100,
+   "k": 28
+  },
+  {
+   "t": 2.75,
+   "name": "G#4",
+   "v": 100,
+   "k": 47
+  },
+  {
+   "t": 2.75,
+   "name": "C#5",
+   "v": 101,
+   "k": 52
+  },
+  {
+   "t": 2.75,
+   "name": "E5",
+   "v": 100,
+   "k": 55
+  },
+  {
+   "t": 2.75,
+   "name": "G#5",
+   "v": 104,
+   "k": 59
+  }
+ ],
+ "hl": 29
+}
